@@ -37,7 +37,7 @@ int main() {
 
         std::cout << "shell:" << path << "> ";
         getline(std::cin, str);
-        boost::split(str_split, str, boost::is_any_of(" "));
+        boost::split(str_split, str, boost::is_any_of(" "), boost::token_compress_on);
         status = execute_command(str_split);
 
         if(status == status::EXIT)
