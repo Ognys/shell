@@ -20,6 +20,8 @@ int main() {
         std::string path = std::filesystem::current_path();
         auto new_end = std::remove(path.begin(), path.end(), '"');
         path.erase(new_end, path.end());
+        path.replace(0, std::strlen(home), "~");
+
         std::cout << "shell:" << path << "> ";
         getline(std::cin, str);
         boost::split(str_split, str, boost::is_any_of(" "));
@@ -32,6 +34,9 @@ void execute_command(std::vector<std::string> args) {
         return;
     else if(args[0] == "cd")
     {
-        chdir(args[1].c_str());
+        if(args[1] != "~")
+            chdir(args[1].c_str());
+        else
+            chdir(std::getenv("HOME"));
     }
 }
