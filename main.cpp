@@ -4,6 +4,7 @@
 #include <boost/algorithm/string.hpp>
 #include <unistd.h>
 #include <filesystem>
+#include <cstdlib>
 
 
 
@@ -56,6 +57,8 @@ status execute_command(std::vector<std::string> args) {
     {
         return status::EXIT;
     }
+    else if(args[0] == "ls")
+        std::system("/home/zaharovya/project/shell/exec/ls");
     return status::CONTINUE;
 }
 
