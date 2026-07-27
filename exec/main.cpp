@@ -19,6 +19,8 @@ int main() {
 
     for(auto v : elements_dir)
     {
+        if(v[0] == '.')
+            continue;
         std::cout<< v << std::endl;
     }
 }
