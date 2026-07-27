@@ -5,12 +5,21 @@
 #include <unistd.h>
 #include <filesystem>
 
-void execute_command(std::vector<std::string> args);
+
+
+enum class status {
+    CONTINUE,
+    EXIT,
+};
+
+status execute_command(std::vector<std::string> args);
 
 int main() {
 
     std::string str;
     std::vector<std::string> str_split;
+
+    status status = status::CONTINUE;
 
     const char* home = std::getenv("HOME");
 
@@ -25,18 +34,28 @@ int main() {
         std::cout << "shell:" << path << "> ";
         getline(std::cin, str);
         boost::split(str_split, str, boost::is_any_of(" "));
-        execute_command(str_split);
+        status = execute_command(str_split);
+
+        if(status == status::EXIT)
+            break;
     }
 }
 
-void execute_command(std::vector<std::string> args) {
+status execute_command(std::vector<std::string> args) {
     if(args.empty())
-        return;
+        return status::CONTINUE;
     else if(args[0] == "cd")
     {
         if(args[1] != "~")
             chdir(args[1].c_str());
         else
             chdir(std::getenv("HOME"));
+        return status::CONTINUE;
     }
+    else if(args[0] == "exit")
+    {
+        return status::EXIT;
+    }
+    return status::CONTINUE;
 }
+
