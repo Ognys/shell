@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <filesystem>
 #include <cstdlib>
+#include <optional>
+#include <sys/wait.h>
 
 
 
@@ -14,6 +16,7 @@ enum class status {
 };
 
 status execute_command(std::vector<std::string> args);
+std::optional<std::filesystem::path> find_command(const std::string& command);
 
 int main() {
 
@@ -57,8 +60,22 @@ status execute_command(std::vector<std::string> args) {
     {
         return status::EXIT;
     }
-    else if(args[0] == "ls")
-        std::system("/home/zaharovya/project/shell/exec/ls");
+    else
+    {
+
+    }
+
     return status::CONTINUE;
+}
+
+std::optional<std::filesystem::path> find_command(const std::string& command) {
+    std::vector<char> buffer(4096);
+    auto length = readlink("/proc/self/exe", buffer.data(), buffer.size());
+    std::filesystem::path executable_path(buffer.data(), buffer.data() + length);
+    std::filesystem::path command_path = executable_path.parent_path() / "exec" / command;
+    if(!std::filesystem::exists(executable_path))
+        return std::nullopt;
+
+    return command_path;
 }
 
