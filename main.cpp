@@ -17,7 +17,10 @@ int main() {
     chdir(home);
 
     while(true) {
-        std::cout << "shell:" << std::filesystem::current_path() << "> ";
+        std::string path = std::filesystem::current_path();
+        auto new_end = std::remove(path.begin(), path.end(), '"');
+        path.erase(new_end, path.end());
+        std::cout << "shell:" << path << "> ";
         getline(std::cin, str);
         boost::split(str_split, str, boost::is_any_of(" "));
         execute_command(str_split);
