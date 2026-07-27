@@ -62,7 +62,24 @@ status execute_command(std::vector<std::string> args) {
     }
     else
     {
+        auto fc = find_command(args[0]);
+        pid_t pid = fork();
+        std::vector<char*> argv;
+        for (std::string& arg : args) {
+    argv.push_back(arg.data());
+    }
 
+    argv.push_back(nullptr);
+    int status;
+    if(pid == 0)
+        execv(fc->string().c_str(), argv.data());
+    else if(pid > 0)
+    {
+        waitpid(pid, &status, 0);
+    }
+
+    
+    return status::CONTINUE;
     }
 
     return status::CONTINUE;
