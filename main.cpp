@@ -81,6 +81,20 @@ status execute_command(std::vector<std::string> args) {
     {
         return status::EXIT;
     }
+    else if(args[0] == "export")
+    {
+        if(args[1].find("=") != std::string::npos)
+        {
+            std::size_t pos = args[0].find("=");
+            std::string key = args[0].substr(0, pos);
+            std::string val = args[0].substr(pos + 1);
+            variables[key] = val;
+            setenv(key.c_str(), val.c_str(), 1);
+        }
+        else{
+            setenv(args[1].c_str(), variables[args[1]].c_str(), 1);
+        }
+    }
     else
     {
         auto fc = find_command(args[0]);
