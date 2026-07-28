@@ -13,14 +13,7 @@
 
 #include "ShellCore.h"
 
-
-
-enum class status {
-    CONTINUE,
-    EXIT,
-};
-
-status execute_command(std::vector<std::string> args);
+ShellCore::CommandStatus execute_command(std::vector<std::string> args);
 std::optional<std::filesystem::path> find_command(const std::string& command);
 
 
@@ -29,7 +22,7 @@ int main() {
     std::string str;
     std::vector<std::string> str_split;
 
-    status status = status::CONTINUE;
+    ShellCore::CommandStatus status = ShellCore::CommandStatus::CONTINUE;
 
     const char* home = std::getenv("HOME");
 
@@ -47,14 +40,14 @@ int main() {
         str_split = ShellCore::shell_pars(str);
         status = execute_command(str_split);
 
-        if(status == status::EXIT)
+        if(status == ShellCore::CommandStatus::EXIT)
             break;
     }
 }
 
-status execute_command(std::vector<std::string> args) {
+ShellCore::CommandStatus execute_command(std::vector<std::string> args) {
     if(args.empty())
-        return status::CONTINUE;
+        return ShellCore::CommandStatus::CONTINUE;
 
     
     if(args.size() == 1 && args[0].find("=") != std::string::npos)
@@ -70,11 +63,11 @@ status execute_command(std::vector<std::string> args) {
             chdir(args[1].c_str());
         else
             chdir(std::getenv("HOME"));
-        return status::CONTINUE;
+        return ShellCore::CommandStatus::CONTINUE;
     }
     else if(args[0] == "exit")
     {
-        return status::EXIT;
+        return ShellCore::CommandStatus::EXIT;
     }
     else if(args[0] == "export")
     {
@@ -132,10 +125,10 @@ status execute_command(std::vector<std::string> args) {
         }
 
     
-        return status::CONTINUE;
+        return ShellCore::CommandStatus::CONTINUE;
     }
 
-    return status::CONTINUE;
+    return ShellCore::CommandStatus::CONTINUE;
 }
 
 std::optional<std::filesystem::path> find_command(const std::string& command) {

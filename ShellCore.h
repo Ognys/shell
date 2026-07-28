@@ -13,6 +13,11 @@ public:
     static std::vector<std::string> shell_pars(std::string str);
     static std::unordered_map<std::string, std::string> variables;
 
+    enum class CommandStatus {
+    CONTINUE,
+    EXIT,
+    };
+
 private:
     enum class quotes {
         NONE,
