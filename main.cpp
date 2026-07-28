@@ -95,6 +95,11 @@ status execute_command(std::vector<std::string> args) {
             setenv(args[1].c_str(), variables[args[1]].c_str(), 1);
         }
     }
+    else if(args[0] == "unset")
+    {
+        variables.erase(args[1]);
+        unsetenv(args[1].c_str());
+    }
     else
     {
         auto fc = find_command(args[0]);
