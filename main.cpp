@@ -9,6 +9,8 @@
 #include <sys/wait.h>
 #include <unordered_map>
 
+#include "options_shell.h"
+
 
 
 enum class status {
@@ -39,7 +41,8 @@ int main() {
 
         std::cout << "shell:" << path << "> ";
         getline(std::cin, str);
-        boost::split(str_split, str, boost::is_any_of(" "), boost::token_compress_on);
+        //boost::split(str_split, str, boost::is_any_of(" "), boost::token_compress_on);
+        str_split = options_shell::shell_pars(str);
         status = execute_command(str_split);
 
         if(status == status::EXIT)
