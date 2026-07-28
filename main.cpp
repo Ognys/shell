@@ -86,13 +86,22 @@ status execute_command(std::vector<std::string> args) {
 }
 
 std::optional<std::filesystem::path> find_command(const std::string& command) {
-    std::vector<char> buffer(4096);
-    auto length = readlink("/proc/self/exe", buffer.data(), buffer.size());
-    std::filesystem::path executable_path(buffer.data(), buffer.data() + length);
-    std::filesystem::path command_path = executable_path.parent_path() / "exec" / command;
-    if(!std::filesystem::exists(executable_path))
-        return std::nullopt;
 
-    return command_path;
+    const char* c_path = getenv("PATH");
+    std::string str_path = c_path;
+    std::vector<std::string> split_path;
+    boost::split(split_path, str_path, boost::is_any_of(":"));
+    for(int i =0;i < split_path.size();i++)
+    {
+        if(std::filesystem::exists(split_path[i] + "/" + command))
+            return split_path[i] + "/" + command;  
+    }
+
+    //std::vector<char> buffer(4096);
+    //auto length = readlink("/proc/self/exe", buffer.data(), buffer.size());
+    //std::filesystem::path executable_path(buffer.data(), buffer.data() + length);
+    //std::filesystem::path command_path = executable_path.parent_path() / "exec" / command;
+
+    return std::nullopt;
 }
 
