@@ -1,14 +1,19 @@
 #include<vector>
 #include<string>
 #include <stdexcept>
+#include <cctype>
 
 #include "options_shell.h"
+
+std::unordered_map<std::string, std::string> options_shell::variables{};
 
 std::vector<std::string> options_shell::shell_pars(std::string str) {
 
     quotes state = quotes::NONE;
     std::vector<std::string> res;
     std::string buf = "";
+    bool argument_started = false;
+
     for(int i = 0; i < str.length(); i++)
     {
 
@@ -17,24 +22,33 @@ std::vector<std::string> options_shell::shell_pars(std::string str) {
             if(str[i] == '"')
             {
                 state = quotes::DOUBLE_QUOTES;
+                argument_started = true;
                 continue;
             }
             else if(str[i] == '\'')
             {
                 state = quotes::SINGLE_QUOTES;
+                argument_started = true;
                 continue;
             }
 
-            if(str[i] == ' ' && buf.length() != 0)
+            if(str[i] == ' ' && argument_started)
             {
+
                 res.push_back(buf);
                 buf = "";
+                argument_started = false;
                 continue;
             }
             else if(str[i] == ' ')
+            {
+                argument_started = false;
                 continue;
+            }
+                
         
             buf+= str[i];
+            argument_started = true;
         }
         else if(state == quotes::DOUBLE_QUOTES)
         {
@@ -42,7 +56,33 @@ std::vector<std::string> options_shell::shell_pars(std::string str) {
             {
                 state = quotes::NONE;
                 continue;
-            }        
+            }
+            
+            if(str[i] == '$')
+            {
+                int j = i + 1;
+                std::string key = "";
+                if(!((j < str.length()) && (std::isalpha(str[j]) || str[j] == '_')))
+                {
+                    buf += str[i];
+                    continue;
+                }
+                key += str[j];
+                j++;
+                while((j < str.length()) && (std::isalnum(str[j]) || (str[j] == '_')))
+                {
+                    key += str[j];
+                    j++;
+
+                }
+                auto fk = variables.find(key);
+
+                if(fk != variables.end())
+                    buf += fk->second;
+                i = j - 1;
+                continue;
+            }
+
             buf+= str[i];
         }
         else if(state == quotes::SINGLE_QUOTES)
@@ -60,7 +100,7 @@ std::vector<std::string> options_shell::shell_pars(std::string str) {
         if(state != quotes::NONE)
          throw std::runtime_error("quotes not closed");
 
-    if(buf.length() != 0)
+    if(argument_started)
         res.push_back(buf);
 
 

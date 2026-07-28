@@ -20,7 +20,7 @@ enum class status {
 
 status execute_command(std::vector<std::string> args);
 std::optional<std::filesystem::path> find_command(const std::string& command);
-std::unordered_map<std::string, std::string> variables;
+
 
 int main() {
 
@@ -54,23 +54,13 @@ status execute_command(std::vector<std::string> args) {
     if(args.empty())
         return status::CONTINUE;
 
-        for(int i = 1; i < args.size(); i++)
-        {
-            if(args[i].find("$") != std::string::npos)
-            {
-                std::string key = args[i].substr(args[i].find("$") + 1);
-                args[i] = variables[key];
-            }
-                
-        }
-
     
     if(args.size() == 1 && args[0].find("=") != std::string::npos)
     {
         std::size_t pos = args[0].find("=");
         std::string key = args[0].substr(0, pos);
         std::string val = args[0].substr(pos + 1);
-        variables[key] = val;
+        options_shell::variables[key] = val;
     }
     else if(args[0] == "cd")
     {
@@ -91,16 +81,16 @@ status execute_command(std::vector<std::string> args) {
             std::size_t pos = args[0].find("=");
             std::string key = args[0].substr(0, pos);
             std::string val = args[0].substr(pos + 1);
-            variables[key] = val;
+            options_shell::variables[key] = val;
             setenv(key.c_str(), val.c_str(), 1);
         }
         else{
-            setenv(args[1].c_str(), variables[args[1]].c_str(), 1);
+            setenv(args[1].c_str(), options_shell::variables[args[1]].c_str(), 1);
         }
     }
     else if(args[0] == "unset")
     {
-        variables.erase(args[1]);
+        options_shell::variables.erase(args[1]);
         unsetenv(args[1].c_str());
     }
     else
