@@ -8,6 +8,8 @@
 #include <optional>
 #include <sys/wait.h>
 #include <unordered_map>
+#include <fcntl.h>   
+#include <unistd.h>
 
 #include "options_shell.h"
 
@@ -95,24 +97,42 @@ status execute_command(std::vector<std::string> args) {
     }
     else
     {
+        std::string file_path;
+        std::string redirect_operator;
+        for(int i = 0; i < args.size(); i++)
+        {
+            if(args[i] == ">")
+            {
+                file_path = args[i + 1];
+                redirect_operator = args[i];
+                args.erase(args.begin() + i, args.end());
+                break;
+            }
+        }
+
         auto fc = find_command(args[0]);
         pid_t pid = fork();
         std::vector<char*> argv;
         for (std::string& arg : args) {
-    argv.push_back(arg.data());
-    }
+            argv.push_back(arg.data());
+        }
 
-    argv.push_back(nullptr);
-    int status;
-    if(pid == 0)
-        execv(fc->string().c_str(), argv.data());
-    else if(pid > 0)
-    {
-        waitpid(pid, &status, 0);
-    }
+        argv.push_back(nullptr);
+        int status;
+        if(pid == 0){
+            
+            int fd = open(file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            dup2(fd, STDOUT_FILENO);
+            close(fd);
+            execv(fc->string().c_str(), argv.data());
+        }
+        else if(pid > 0)
+        {
+            waitpid(pid, &status, 0);
+        }
 
     
-    return status::CONTINUE;
+        return status::CONTINUE;
     }
 
     return status::CONTINUE;
