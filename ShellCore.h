@@ -7,7 +7,7 @@
 
 
 
-class options_shell {
+class ShellCore {
 
 public:
     static std::vector<std::string> shell_pars(std::string str);

@@ -11,7 +11,7 @@
 #include <fcntl.h>   
 #include <unistd.h>
 
-#include "options_shell.h"
+#include "ShellCore.h"
 
 
 
@@ -44,7 +44,7 @@ int main() {
         std::cout << "shell:" << path << "> ";
         getline(std::cin, str);
         //boost::split(str_split, str, boost::is_any_of(" "), boost::token_compress_on);
-        str_split = options_shell::shell_pars(str);
+        str_split = ShellCore::shell_pars(str);
         status = execute_command(str_split);
 
         if(status == status::EXIT)
@@ -62,7 +62,7 @@ status execute_command(std::vector<std::string> args) {
         std::size_t pos = args[0].find("=");
         std::string key = args[0].substr(0, pos);
         std::string val = args[0].substr(pos + 1);
-        options_shell::variables[key] = val;
+        ShellCore::variables[key] = val;
     }
     else if(args[0] == "cd")
     {
@@ -83,16 +83,16 @@ status execute_command(std::vector<std::string> args) {
             std::size_t pos = args[0].find("=");
             std::string key = args[0].substr(0, pos);
             std::string val = args[0].substr(pos + 1);
-            options_shell::variables[key] = val;
+            ShellCore::variables[key] = val;
             setenv(key.c_str(), val.c_str(), 1);
         }
         else{
-            setenv(args[1].c_str(), options_shell::variables[args[1]].c_str(), 1);
+            setenv(args[1].c_str(), ShellCore::variables[args[1]].c_str(), 1);
         }
     }
     else if(args[0] == "unset")
     {
-        options_shell::variables.erase(args[1]);
+        ShellCore::variables.erase(args[1]);
         unsetenv(args[1].c_str());
     }
     else

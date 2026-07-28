@@ -3,11 +3,11 @@
 #include <stdexcept>
 #include <cctype>
 
-#include "options_shell.h"
+#include "ShellCore.h"
 
-std::unordered_map<std::string, std::string> options_shell::variables{};
+std::unordered_map<std::string, std::string> ShellCore::variables{};
 
-std::vector<std::string> options_shell::shell_pars(std::string str) {
+std::vector<std::string> ShellCore::shell_pars(std::string str) {
 
     quotes state = quotes::NONE;
     std::vector<std::string> res;
