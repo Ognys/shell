@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <optional>
 #include <sys/wait.h>
+#include <unordered_map>
 
 
 
@@ -17,6 +18,7 @@ enum class status {
 
 status execute_command(std::vector<std::string> args);
 std::optional<std::filesystem::path> find_command(const std::string& command);
+std::unordered_map<std::string, std::string> variables;
 
 int main() {
 
@@ -48,6 +50,25 @@ int main() {
 status execute_command(std::vector<std::string> args) {
     if(args.empty())
         return status::CONTINUE;
+
+        for(int i = 1; i < args.size(); i++)
+        {
+            if(args[i].find("$") != std::string::npos)
+            {
+                std::string key = args[i].substr(args[i].find("$") + 1);
+                args[i] = variables[key];
+            }
+                
+        }
+
+    
+    if(args.size() == 1 && args[0].find("=") != std::string::npos)
+    {
+        std::size_t pos = args[0].find("=");
+        std::string key = args[0].substr(0, pos);
+        std::string val = args[0].substr(pos + 1);
+        variables[key] = val;
+    }
     else if(args[0] == "cd")
     {
         if(args[1] != "~")
