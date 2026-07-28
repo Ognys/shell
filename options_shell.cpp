@@ -45,7 +45,17 @@ std::vector<std::string> options_shell::shell_pars(std::string str) {
                 argument_started = false;
                 continue;
             }
-                
+            if(str[i] == '\\')
+            {
+                if((i + 1) < str.length())
+                {
+                i++;
+                buf+= str[i];
+                argument_started = true;
+                continue;
+                }
+
+            }
         
             buf+= str[i];
             argument_started = true;
@@ -81,6 +91,16 @@ std::vector<std::string> options_shell::shell_pars(std::string str) {
                     buf += fk->second;
                 i = j - 1;
                 continue;
+            }
+
+            if(str[i] == '\\')
+            {
+                if( ((i + 1) < str.length()) && (std::string("\\\"$").find(str[i + 1]) != std::string::npos))
+                {
+                    i++;
+                    buf+= str[i];
+                    continue;
+                }
             }
 
             buf+= str[i];
