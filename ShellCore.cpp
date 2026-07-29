@@ -146,12 +146,6 @@ std::optional<std::filesystem::path> ShellCore::find_command(const std::string& 
         if(std::filesystem::exists(split_path[i] + "/" + command))
             return split_path[i] + "/" + command;  
     }
-
-    //std::vector<char> buffer(4096);
-    //auto length = readlink("/proc/self/exe", buffer.data(), buffer.size());
-    //std::filesystem::path executable_path(buffer.data(), buffer.data() + length);
-    //std::filesystem::path command_path = executable_path.parent_path() / "exec" / command;
-
     return std::nullopt;
 }
 
@@ -204,13 +198,14 @@ ShellCore::CommandStatus ShellCore::execute_command(std::vector<std::string> arg
         std::string redirect_operator;
         for(int i = 0; i < args.size(); i++)
         {
-            if(args[i] == ">")
+            if(args[i] == ">" || args[i] == ">>")
             {
                 file_path = args[i + 1];
                 redirect_operator = args[i];
                 args.erase(args.begin() + i, args.end());
                 break;
             }
+
         }
 
         auto fc = find_command(args[0]);
@@ -223,9 +218,17 @@ ShellCore::CommandStatus ShellCore::execute_command(std::vector<std::string> arg
         argv.push_back(nullptr);
         int status;
         if(pid == 0){
-            
-            int fd = open(file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-            dup2(fd, STDOUT_FILENO);
+            int fd;
+            if(redirect_operator == ">")
+            {
+                fd = open(file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                dup2(fd, STDOUT_FILENO);
+            }
+            else if(redirect_operator == ">>")
+            {
+                fd = open(file_path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644);
+                dup2(fd, STDOUT_FILENO);
+            }
             close(fd);
             execv(fc->string().c_str(), argv.data());
         }
