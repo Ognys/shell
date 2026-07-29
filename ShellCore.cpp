@@ -195,11 +195,12 @@ ShellCore::CommandStatus ShellCore::execute_command(std::vector<std::string> arg
     else
     {
         std::vector<Redirection> redirection;
+        std::vector<std::string> command_args;
         for(int i = 0; i < args.size(); i++)
         {
-            if(redirect_ops.contains(args[i]))
+            if(redirect_ops.find(args[i]) != redirect_ops.end())
             {
-                if(((i + 1) < args.size()) && (!redirect_ops.contains(args[i + 1])))
+                if(((i + 1) < args.size()) && (!(redirect_ops.find(args[i + 1]) != redirect_ops.end())))
                 {
                     redirection.push_back(Redirection{args[i], args[i + 1]});
                     i++;
@@ -212,10 +213,10 @@ ShellCore::CommandStatus ShellCore::execute_command(std::vector<std::string> arg
                 command_args.push_back(args[i]);
         }
 
-        auto fc = find_command(args[0]);
+        auto fc = find_command(command_args[0]);
         pid_t pid = fork();
         std::vector<char*> argv;
-        for (std::string& arg : args) {
+        for (std::string& arg : command_args) {
             argv.push_back(arg.data());
         }
 
@@ -223,15 +224,29 @@ ShellCore::CommandStatus ShellCore::execute_command(std::vector<std::string> arg
         int status;
         if(pid == 0){
             int fd;
-            if(redirect_operator == ">")
+            for(int i = 0; i < redirection.size();i++)
             {
-                fd = open(file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-                dup2(fd, STDOUT_FILENO);
-            }
-            else if(redirect_operator == ">>")
-            {
-                fd = open(file_path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644);
-                dup2(fd, STDOUT_FILENO);
+                if(redirection[i].op == ">")
+                {
+                    fd = open(redirection[i].path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                    dup2(fd, STDOUT_FILENO);
+                }
+                else if(redirection[i].op == ">>")
+                {
+                    fd = open(redirection[i].path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644);
+                    dup2(fd, STDOUT_FILENO);
+                }
+                else if(redirection[i].op == "<")
+                {
+                    fd = open(redirection[i].path.c_str(), O_RDONLY);
+                    dup2(fd, STDIN_FILENO);
+                }
+                else if(redirection[i].op == "2>")
+                {
+                    fd = open(redirection[i].path.c_str(), O_WRONLY | O_CREAT | O_TRUNC , 0644);
+                    dup2(fd, STDERR_FILENO);
+                } 
+
             }
             close(fd);
             execv(fc->string().c_str(), argv.data());

@@ -25,7 +25,7 @@ public:
 
 private:
     static std::optional<std::filesystem::path> find_command(const std::string& command);
-    static const std::unordered_set<std::string> redirect_ops = {">", ">>", "<", "2>", "2>>"};
+    inline static const std::unordered_set<std::string> redirect_ops = {">", ">>", "<", "2>", "2>>"};
 
     enum class quotes {
         NONE,
@@ -36,5 +36,5 @@ private:
     struct Redirection {
         std::string op;
         std::string path;
-    }
+    };
 };
