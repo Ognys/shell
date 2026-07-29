@@ -246,7 +246,11 @@ ShellCore::CommandStatus ShellCore::execute_command(std::vector<std::string> arg
                     fd = open(redirection[i].path.c_str(), O_WRONLY | O_CREAT | O_TRUNC , 0644);
                     dup2(fd, STDERR_FILENO);
                 } 
-
+                else if(redirection[i].op == "2>>")
+                {
+                    fd = open(redirection[i].path.c_str(), O_WRONLY | O_CREAT | O_APPEND , 0644);
+                    dup2(fd, STDERR_FILENO);
+                } 
             }
             close(fd);
             execv(fc->string().c_str(), argv.data());
