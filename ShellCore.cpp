@@ -194,18 +194,22 @@ ShellCore::CommandStatus ShellCore::execute_command(std::vector<std::string> arg
     }
     else
     {
-        std::string file_path;
-        std::string redirect_operator;
+        std::vector<Redirection> redirection;
         for(int i = 0; i < args.size(); i++)
         {
-            if(args[i] == ">" || args[i] == ">>")
+            if(redirect_ops.contains(args[i]))
             {
-                file_path = args[i + 1];
-                redirect_operator = args[i];
-                args.erase(args.begin() + i, args.end());
-                break;
+                if(((i + 1) < args.size()) && (!redirect_ops.contains(args[i + 1])))
+                {
+                    redirection.push_back(Redirection{args[i], args[i + 1]});
+                    i++;
+                    continue;
+                }
+                else
+                    return CommandStatus::ERROR;
             }
-
+            else
+                command_args.push_back(args[i]);
         }
 
         auto fc = find_command(args[0]);
